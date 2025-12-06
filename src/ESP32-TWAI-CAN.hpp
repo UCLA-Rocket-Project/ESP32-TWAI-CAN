@@ -119,22 +119,22 @@ class TwaiCAN {
     bool restart(void);
 
     // Pass frame either by reference or pointer; timeout in ms, you can pass 0 for non blocking
-    inline bool IRAM_ATTR_TWAI readFrame(CanFrame& frame, uint32_t timeout = 1000) { return readFrame(&frame, timeout); }
-    inline bool IRAM_ATTR_TWAI readFrame(CanFrame* frame, uint32_t timeout = 1000) {
+    inline bool IRAM_ATTR_TWAI readFrame(CanFrame* frame, uint32_t timeout = 1000) { return (frame) && readFrame(*frame, timeout); }
+    inline bool IRAM_ATTR_TWAI readFrame(CanFrame& frame, uint32_t timeout = 1000) {
         bool ret = false;
-        if((frame) && twai_receive(frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
-            LOG_TWAI_RX("Frame received %03X", frame->identifier);
+        if(twai_receive(&frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
+            LOG_TWAI_RX("Frame received %03X", frame.identifier);
             ret = true;
         }
         return ret;
     }
 
     // Pass frame either by reference or pointer; timeout in ms, you can pass 0 for non blocking
-    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame& frame, uint32_t timeout = 1) { return writeFrame(&frame, timeout); }
-    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame* frame, uint32_t timeout = 1) {
+    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame* frame, uint32_t timeout = 1) { return (frame) && writeFrame(*frame, timeout); }
+    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame& frame, uint32_t timeout = 1) {
         bool ret = false;
-        if((frame) && twai_transmit(frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
-            LOG_TWAI_TX("Frame sent     %03X", frame->identifier);
+        if(twai_transmit(&frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
+            LOG_TWAI_TX("Frame sent     %03X", frame.identifier);
             ret = true;
         }
         return ret;
