@@ -226,11 +226,11 @@ bool TwaiCAN::begin(TwaiSpeed              twaiSpeed,
                                           .rx_queue_len   = rxQueueSize,
                                           .alerts_enabled = TWAI_ALERT_NONE,
                                           .clkout_divider = 0,
-                                    #if CONFIG_TWAI_ISR_IN_IRAM
-                                          .intr_flags     = ESP_INTR_FLAG_IRAM  };
-                                    #else
-                                          .intr_flags     = ESP_INTR_FLAG_LEVEL1};
-                                    #endif
+#if CONFIG_TWAI_ISR_IN_IRAM
+                                          .intr_flags = ESP_INTR_FLAG_IRAM};
+#else
+                                          .intr_flags = ESP_INTR_FLAG_LEVEL1};
+#endif
         // clang-format off
         twai_timing_config_t t_config[TWAI_SPEED_SIZE] = {
             #if (SOC_TWAI_BRP_MAX > 256)
@@ -301,6 +301,14 @@ bool TwaiCAN::end() {
     } else
         ret = true;
     return ret;
+}
+
+bool TwaiCAN::clearReceiveQueue() {
+    return twai_clear_receive_queue() == ESP_OK;
+}
+
+bool TwaiCAN::clearTransmitQueue() {
+    return twai_clear_transmit_queue() == ESP_OK;
 }
 
 TwaiCAN ESP32Can;

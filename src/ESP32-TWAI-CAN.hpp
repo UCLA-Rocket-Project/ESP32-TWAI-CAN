@@ -23,7 +23,7 @@
 # include "inttypes.h"
 #endif
 
-//#define ESP_INTR_FLAG_IRAM 
+// #define ESP_INTR_FLAG_IRAM
 #include "driver/twai.h"
 
 // Uncomment or declare before importing header
@@ -44,9 +44,9 @@
 #endif
 
 #if CONFIG_TWAI_ISR_IN_IRAM
-#define IRAM_ATTR_TWAI IRAM_ATTR
+# define IRAM_ATTR_TWAI IRAM_ATTR
 #else
-#define IRAM_ATTR_TWAI
+# define IRAM_ATTR_TWAI
 #endif
 
 typedef twai_message_t CanFrame;
@@ -119,7 +119,9 @@ class TwaiCAN {
     bool restart(void);
 
     // Pass frame either by reference or pointer; timeout in ms, you can pass 0 for non blocking
-    inline bool IRAM_ATTR_TWAI readFrame(CanFrame* frame, uint32_t timeout = 1000) { return (frame) && readFrame(*frame, timeout); }
+    inline bool IRAM_ATTR_TWAI readFrame(CanFrame* frame, uint32_t timeout = 1000) {
+        return (frame) && readFrame(*frame, timeout);
+    }
     inline bool IRAM_ATTR_TWAI readFrame(CanFrame& frame, uint32_t timeout = 1000) {
         bool ret = false;
         if(twai_receive(&frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
@@ -130,7 +132,9 @@ class TwaiCAN {
     }
 
     // Pass frame either by reference or pointer; timeout in ms, you can pass 0 for non blocking
-    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame* frame, uint32_t timeout = 1) { return (frame) && writeFrame(*frame, timeout); }
+    inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame* frame, uint32_t timeout = 1) {
+        return (frame) && writeFrame(*frame, timeout);
+    }
     inline bool IRAM_ATTR_TWAI writeFrame(const CanFrame& frame, uint32_t timeout = 1) {
         bool ret = false;
         if(twai_transmit(&frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
@@ -141,6 +145,13 @@ class TwaiCAN {
     }
 
     bool end();
+
+    /**
+     * Ideally, add in a small delay before queue clearing functions are run,
+     * so that the messages have time to all get loaded into the software buffers
+     */
+    bool clearTransmitQueue();
+    bool clearReceiveQueue();
 
   protected:
     twai_status_info_t status;
